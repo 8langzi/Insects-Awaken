@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.insects.getdata.mapper.EmployeeMapper">
+
+    <resultMap id="BaseResultMap" type="com.insects.getdata.domain.Employee">
+        <result column="PPP_ID" jdbcType="VARCHAR" property="PPP_ID" />
+        <result column="RPI_NAME" jdbcType="VARCHAR" property="RPI_NAME" />
+        <result column="SCO_NAME" jdbcType="VARCHAR" property="SCO_NAME" />
+        <result column="ECO_NAME" jdbcType="VARCHAR" property="ECO_NAME" />
+        <result column="AOI_NAME" jdbcType="VARCHAR" property="AOI_NAME" />
+        <result column="PTI_NAME" jdbcType="VARCHAR" property="PTI_NAME" />
+        <result column="CTI_NAME" jdbcType="VARCHAR" property="CTI_NAME" />
+        <result column="CER_NUM" jdbcType="VARCHAR" property="CER_NUM" />
+        <result column="PPP_GET_DATE" jdbcType="VARCHAR" property="PPP_GET_DATE" />
+        <result column="PPP_END_DATE" jdbcType="VARCHAR" property="PPP_END_DATE" />
+        <result column="COUNTCER" jdbcType="VARCHAR" property="COUNTCER" />
+        <result column="COUNTCX" jdbcType="VARCHAR" property="COUNTCX" />
+        <result column="RNUM" jdbcType="VARCHAR" property="RNUM" />
+    </resultMap>
+
+    <insert id="addEmploee" parameterType="java.util.List">
+        replace into employee (
+        PPP_ID,RPI_NAME,SCO_NAME,ECO_NAME,AOI_NAME,PTI_NAME,CTI_NAME,CER_NUM,PPP_GET_DATE,PPP_END_DATE,COUNTCER,COUNTCX,RNUM
+        )
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.PPP_ID},#{item.RPI_NAME},#{item.SCO_NAME},#{item.ECO_NAME},#{item.AOI_NAME},#{item.PTI_NAME},#{item.CTI_NAME},
+            #{item.CER_NUM},#{item.PPP_GET_DATE},#{item.PPP_END_DATE},#{item.COUNTCER},#{item.COUNTCX},#{item.RNUM}
+            )
+        </foreach>
+    </insert>
+
+</mapper>
