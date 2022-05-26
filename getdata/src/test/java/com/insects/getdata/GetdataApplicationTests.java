@@ -1,7 +1,6 @@
 package com.insects.getdata;
 
-import com.insects.getdata.service.SecuritiesAssociationOfChinaServiceImpl;
-import org.checkerframework.checker.units.qual.A;
+import com.insects.getdata.service.securitiesassociationofchina.SecuritiesAssociationOfChinaServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
