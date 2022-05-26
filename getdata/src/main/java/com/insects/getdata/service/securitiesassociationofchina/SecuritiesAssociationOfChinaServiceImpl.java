@@ -3,6 +3,7 @@ package com.insects.getdata.service.securitiesassociationofchina;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.errorprone.annotations.Var;
 import com.insects.getdata.common.HttpCommonUtils;
 import com.insects.getdata.domain.Company;
 import com.insects.getdata.domain.Employee;
@@ -63,6 +64,10 @@ public class SecuritiesAssociationOfChinaServiceImpl {
 
     String employeeUrl = "https://exam.sac.net.cn/pages/registration/train-line-register!list.action";
 
+    String employeeRPIIDUrl = "https://exam.sac.net.cn/pages/registration/train-line-register!gsUDDIsearch.action";
+
+    String employeeDetailUrl = "https://exam.sac.net.cn/pages/registration/train-line-register!gsUDDIsearch.action";
+
     public void processAcquiredCompanyData() throws IOException, NoSuchAlgorithmException, KeyManagementException {
         SSLContext ctx = SSLContext.getInstance("TLS");
         ctx.init(null, new TrustManager[]{tm}, null);
@@ -96,6 +101,53 @@ public class SecuritiesAssociationOfChinaServiceImpl {
         });
     }
 
+    public void processEmployeeDetailByPPPID() {
+        List<String> allPPPID = employeeService.getAllPPPID();
+        allPPPID.parallelStream().forEach(pppId -> {
+            SSLContext ctx = null;
+            try {
+                ctx = SSLContext.getInstance("TLS");
+                ctx.init(null, new TrustManager[]{tm}, null);
+                HttpClient httpClient = HttpClients.custom().setSSLContext(ctx).build();
+                HttpPost httpPost = new HttpPost(employeeRPIIDUrl);
+                HttpCommonUtils.setHeader(httpPost);
+                convertEmployeeDetailAndInsertDBByPPPID(pppId, httpClient, httpPost);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void convertEmployeeDetailAndInsertDBByPPPID(String pppId, HttpClient httpClient, HttpPost httpPost) throws IOException {
+        try {
+            httpPost.setEntity(new UrlEncodedFormEntity(convertEmployeePPPIDReq(pppId)));
+            HttpResponse responseSon = httpClient.execute(httpPost);
+            String resultSon = EntityUtils.toString(responseSon.getEntity(), "utf-8");
+            JSONArray RPIIDArray = JSON.parseArray(resultSon);
+            for (Object jsonObject : RPIIDArray) {
+                String rpiId = ((JSONObject) jsonObject).getString("RPI_ID");
+                httpPost = new HttpPost(employeeRPIIDUrl);
+                HttpCommonUtils.setHeader(httpPost);
+                httpPost.setEntity(new UrlEncodedFormEntity(convertEmployeeDetailReq(rpiId)));
+                HttpResponse responseDetail = httpClient.execute(httpPost);
+                String resultDetail = EntityUtils.toString(responseDetail.getEntity(), "utf-8");
+
+                System.out.println("11");
+            }
+            System.out.println(resultSon);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
     public void convertCompanyDataAndinsertToDB(JSONArray jsonArray) {
@@ -121,15 +173,15 @@ public class SecuritiesAssociationOfChinaServiceImpl {
             JSONArray employArray = employJSON.getJSONArray("result");
             System.out.println("id is " + id + " , employArray size is " + employArray.size());
             List<Employee> employees = new ArrayList<>();
-//            for (int i = 0; i < employArray.size(); i++) {
-//                Employee employee = JSON.toJavaObject((JSON) employArray.getJSONObject(i), Employee.class);
-//                employees.add(employee);
-//                if((i % 50 == 0 && i != 0) || employArray.size()-1 == i){
-//                    employeeService.addEmploee(employees);
-//                    System.out.println(Thread.currentThread() + " ----- Employee size is : " + employees.size());
-//                    employees.clear();
-//                }
-//            }
+            for (int i = 0; i < employArray.size(); i++) {
+                Employee employee = JSON.toJavaObject((JSON) employArray.getJSONObject(i), Employee.class);
+                employees.add(employee);
+                if ((i % 50 == 0 && i != 0) || employArray.size() - 1 == i) {
+                    employeeService.addEmploee(employees);
+                    System.out.println(Thread.currentThread() + " ----- Employee size is : " + employees.size());
+                    employees.clear();
+                }
+            }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (ClientProtocolException e) {
@@ -163,6 +215,22 @@ public class SecuritiesAssociationOfChinaServiceImpl {
         nvps.add(new BasicNameValuePair("page.pageNo", "1"));
         nvps.add(new BasicNameValuePair("page.orderBy", "id"));
         nvps.add(new BasicNameValuePair("page.order", "desc"));
+        return nvps;
+    }
+
+    private List<? extends NameValuePair> convertEmployeePPPIDReq(String pppId) {
+        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        nvps.add(new BasicNameValuePair("filter_EQS_PPP_ID", pppId));
+        nvps.add(new BasicNameValuePair("sqlkey", "registration"));
+        nvps.add(new BasicNameValuePair("sqlval", "SD_A02Leiirkmuexe_b9ID"));
+        return nvps;
+    }
+
+    private List<? extends NameValuePair> convertEmployeeDetailReq(String RPIID) {
+        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        nvps.add(new BasicNameValuePair("filter_EQS_RPI_ID", RPIID));
+        nvps.add(new BasicNameValuePair("sqlkey", "homepage"));
+        nvps.add(new BasicNameValuePair("sqlval", "SEARCH_BASE_INFO_new"));
         return nvps;
     }
 }

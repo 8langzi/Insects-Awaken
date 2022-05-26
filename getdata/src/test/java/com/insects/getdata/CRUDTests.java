@@ -32,4 +32,13 @@ public class CRUDTests {
         System.out.println("employee size is === " + employees.size());
     }
 
+
+    @Test
+    public void getAllPPPID(){
+        List<String> allPPPID = employeeService.getAllPPPID();
+
+
+        System.out.println(allPPPID.size());
+    }
+
 }

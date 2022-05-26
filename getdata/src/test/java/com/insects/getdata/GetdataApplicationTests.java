@@ -49,4 +49,9 @@ class GetdataApplicationTests {
         }
     }
 
+
+    @Test
+    public void getRPIID(){
+        securitiesAssociationOfChinaService.processEmployeeDetailByPPPID();
+    }
 }
