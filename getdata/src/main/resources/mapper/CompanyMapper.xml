@@ -24,4 +24,13 @@
             )
         </foreach>
     </insert>
+    <select id="getAll" resultType="com.insects.getdata.domain.Company">
+        select
+            AOI_NAME,AOI_ID,PR_COUNT_PERSON,PTI0PERSON,PTI1PERSON,PTI2PERSON,PTI3PERSON,PTI4PERSON,PTI5PERSON,PTI6PERSON,PTI7PERSON
+        from
+            company
+    </select>
+    <select id="getAllAOIID" resultType="java.lang.String">
+        select AOI_ID from company
+    </select>
 </mapper>

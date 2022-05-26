@@ -17,5 +17,11 @@ public class CompanyServiceImpl {
         companyMapper.addCompany(companies);
     }
 
+    public List<Company> getAll(){
+        return companyMapper.getAll();
+    }
 
+    public List<String> getAllAOIID(){
+        return companyMapper.getAllAOIID();
+    }
 }

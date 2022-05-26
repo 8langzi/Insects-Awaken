@@ -25,7 +25,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -76,28 +75,39 @@ public class SecuritiesAssociationOfChinaServiceImpl {
         JSONArray companyArray = HttpCommonUtils.getJSONArrayResponse(response);
         // 转换公司数据并插入数据库
         convertCompanyDataAndinsertToDB(companyArray);
-
-        httpPost.setURI(URI.create(employeeUrl));
-
-        // 根据公司信息获取雇员信息并转换插入数据库
-        convertEmployeeDataAndinsertToDBByCompanyData(companyArray,httpClient,httpPost);
-
     }
+
+    public void processAcquiredEmployeeData() throws IOException, NoSuchAlgorithmException, KeyManagementException {
+        List<String> allIds = companyService.getAllAOIID();
+
+        SSLContext ctx = SSLContext.getInstance("TLS");
+        ctx.init(null, new TrustManager[]{tm}, null);
+        HttpClient httpClient = HttpClients.custom().setSSLContext(ctx).build();
+        HttpPost httpPost = new HttpPost(employeeUrl);
+        HttpCommonUtils.setHeader(httpPost);
+        // 根据公司信息获取雇员信息并转换插入数据库
+        convertEmployeeDataAndinsertToDBByCompanyData(allIds,httpClient,httpPost);
+    }
+
 
     public void convertCompanyDataAndinsertToDB(JSONArray jsonArray){
         List<Company> companies = new ArrayList<>();
-        jsonArray.forEach(jsonObject -> {
-            Company company = JSON.toJavaObject((JSON) jsonObject, Company.class);
+        for (int i = 0; i < jsonArray.size(); i++) {
+            Company company = JSON.toJavaObject((JSON) jsonArray.getJSONObject(i), Company.class);
             companies.add(company);
-            companyService.addCompany(companies);
-        });
+            if((i % 50 == 0 && i != 0) || i == jsonArray.size() - 1){
+                companyService.addCompany(companies);
+                System.out.println(Thread.currentThread() + " ----- compaynies sise is : " + companies.size());
+                companies.clear();
+            }
+        }
     }
 
 
-    public void convertEmployeeDataAndinsertToDBByCompanyData(JSONArray companyArray,HttpClient httpClient,HttpPost httpPost){
-        companyArray.parallelStream().forEach(jsonObject -> {
+    public void convertEmployeeDataAndinsertToDBByCompanyData(List<String> allIds,HttpClient httpClient,HttpPost httpPost){
+        allIds.parallelStream().forEach(id -> {
             try {
-                httpPost.setEntity(new UrlEncodedFormEntity(convertSonReq((JSONObject) jsonObject)));
+                httpPost.setEntity(new UrlEncodedFormEntity(convertEmployeeReq(id)));
                 HttpResponse responseSon = httpClient.execute(httpPost);
                 String resultSon = EntityUtils.toString(responseSon.getEntity(), "utf-8");
                 JSONObject employJSON = JSON.parseObject(resultSon);
@@ -106,8 +116,9 @@ public class SecuritiesAssociationOfChinaServiceImpl {
                 for (int i = 0; i < employArray.size(); i++) {
                     Employee employee = JSON.toJavaObject((JSON) employArray.getJSONObject(i), Employee.class);
                     employees.add(employee);
-                    if(i % 50 == 0 || employArray.size()-1 == i){
+                    if((i % 50 == 0 && i != 0) || employArray.size()-1 == i){
                         employeeService.addEmploee(employees);
+                        System.out.println(Thread.currentThread() + " ----- Employee size is : " + employees.size());
                         employees.clear();
                     }
                 }
@@ -134,9 +145,9 @@ public class SecuritiesAssociationOfChinaServiceImpl {
         return nvps;
     }
 
-    public List<NameValuePair> convertSonReq(JSONObject jsonObject) {
+    public List<NameValuePair> convertEmployeeReq(String aoiId) {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair("filter_EQS_AOI_ID", jsonObject.getString("AOI_ID")));
+        nvps.add(new BasicNameValuePair("filter_EQS_AOI_ID", aoiId));
         nvps.add(new BasicNameValuePair("filter_EQS_PTI_ID", null));
         nvps.add(new BasicNameValuePair("page.searchFileName", "homepage"));
         nvps.add(new BasicNameValuePair("page.sqlKey", "PAGE_FINISH_PUBLICITY"));

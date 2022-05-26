@@ -25,9 +25,22 @@ class GetdataApplicationTests {
     }
 
     @Test
-    void getData() {
+    void getCompanyData() {
         try {
             securitiesAssociationOfChinaService.processAcquiredCompanyData();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void getEmployeeData(){
+        try {
+            securitiesAssociationOfChinaService.processAcquiredEmployeeData();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {

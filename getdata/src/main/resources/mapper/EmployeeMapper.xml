@@ -30,5 +30,13 @@
             )
         </foreach>
     </insert>
-
+    <select id="getAll" resultType="com.insects.getdata.domain.Employee">
+        select
+            PPP_ID,RPI_NAME,SCO_NAME,ECO_NAME,AOI_NAME,PTI_NAME,CTI_NAME,CER_NUM,PPP_GET_DATE,PPP_END_DATE,COUNTCER,COUNTCX,RNUM
+        from
+            employee
+    </select>
+    <select id="getAllPPPID" resultType="java.lang.String">
+        select PPP_ID from employee
+    </select>
 </mapper>

@@ -18,4 +18,11 @@ public class EmployeeServiceImpl {
         employeeMapper.addEmploee(employees);
     }
 
+    public List<Employee> getAll(){
+        return employeeMapper.getAll();
+    }
+
+    public List<String> getAllPPPID(){
+        return employeeMapper.getAllPPPID();
+    }
 }

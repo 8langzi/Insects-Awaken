@@ -9,4 +9,7 @@ public interface EmployeeMapper {
 
     void addEmploee(List<Employee> employees);
 
+    List<Employee> getAll();
+
+    List<String> getAllPPPID();
 }

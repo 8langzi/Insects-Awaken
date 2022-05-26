@@ -9,4 +9,7 @@ public interface CompanyMapper {
 
     void addCompany(List<Company> companies);
 
+    List<Company> getAll();
+
+    List<String> getAllAOIID();
 }
