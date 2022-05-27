@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.insects.getdata.mapper.EmployeeDetailRelationMapper">
+<!--    <resultMap id="BaseResultMap" type="com.insects.dynamicservice.domain.Company">-->
+<!--        <result column="AOI_NAME" jdbcType="VARCHAR" property="AOI_NAME" />-->
+<!--        <result column="AOI_ID" jdbcType="VARCHAR" property="AOI_ID" />-->
+<!--        <result column="PR_COUNT_PERSON" jdbcType="VARCHAR" property="PR_COUNT_PERSON" />-->
+<!--        <result column="PTI0PERSON" jdbcType="VARCHAR" property="PTI0PERSON" />-->
+<!--        <result column="PTI1PERSON" jdbcType="VARCHAR" property="PTI1PERSON" />-->
+<!--        <result column="PTI2PERSON" jdbcType="VARCHAR" property="PTI2PERSON" />-->
+<!--        <result column="PTI3PERSON" jdbcType="VARCHAR" property="PTI3PERSON" />-->
+<!--        <result column="PTI4PERSON" jdbcType="VARCHAR" property="PTI4PERSON" />-->
+<!--        <result column="PTI5PERSON" jdbcType="VARCHAR" property="PTI5PERSON" />-->
+<!--        <result column="PTI6PERSON" jdbcType="VARCHAR" property="PTI6PERSON" />-->
+<!--        <result column="PTI7PERSON" jdbcType="VARCHAR" property="PTI7PERSON" />-->
+<!--    </resultMap>-->
+    <insert id="addOne" parameterType="java.util.List">
+        replace into employee_detail_relation (PPP_ID,RPI_ID,STATE)
+        values (#{PPP_ID},#{RPI_ID},#{STATE})
+
+    </insert>
+
+</mapper>
