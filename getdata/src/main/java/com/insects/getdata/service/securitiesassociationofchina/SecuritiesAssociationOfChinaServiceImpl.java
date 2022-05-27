@@ -132,7 +132,6 @@ public class SecuritiesAssociationOfChinaServiceImpl {
             httpPost.setEntity(new UrlEncodedFormEntity(convertEmployeePPPIDReq(pppId)));
             HttpResponse responseSon = httpClient.execute(httpPost);
             String resultSon = EntityUtils.toString(responseSon.getEntity(), "utf-8");
-            System.out.println(resultSon);
             JSONArray RPIIDArray = JSON.parseArray(resultSon);
             for (Object jsonObject : RPIIDArray) {
                 String rpiId = ((JSONObject) jsonObject).getString("RPI_ID");
@@ -150,7 +149,6 @@ public class SecuritiesAssociationOfChinaServiceImpl {
             }
             if(RPIIDArray.size() == 0){
                 System.out.println("pppid is a " + pppId);
-
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
