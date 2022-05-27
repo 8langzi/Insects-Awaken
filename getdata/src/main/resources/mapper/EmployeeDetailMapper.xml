@@ -22,11 +22,28 @@
         values
         <foreach collection="list" item="item" index="index" separator=",">
             (
-                #{item.AOI_NAME},#{item.AOI_ID},#{item.PR_COUNT_PERSON},#{item.PTI0PERSON},#{item.PTI1PERSON},#{item.PTI2PERSON},#{item.PTI3PERSON},
-                #{item.PTI4PERSON},#{item.PTI5PERSON},#{item.PTI6PERSON},#{item.PTI7PERSON}
+                #{item.SWSB_ID},#{item.RPI_NAME},#{item.SCO_NAME},#{item.AOI_NAME},#{item.CER_NUM},#{item.PTI_NAME},#{item.ECO_NAME},
+                #{item.OBTAIN_DATE},#{item.RPI_PHOTO_PATH},#{item.RPI_ID},#{item.PTI_ID},#{item.RPI_DELEGATE_START_DATE},
+                #{item.RPI_DELEGATE_END_DATE},#{item.RPI_PRACTICE_GEOGRAPHICAL},#{item.ADI_NAME},#{item.AOI_COMPANY_WWW},
+                #{item.AOI_CHARREF_NO},#{item.AOI_CHARREF_NO},#{item.RPI_DP_LIST}
             )
         </foreach>
     </insert>
+
+    <insert id="addOne">
+        replace into employee_detail (
+        SWSB_ID,RPI_NAME,SCO_NAME,AOI_NAME,CER_NUM,PTI_NAME,ECO_NAME,OBTAIN_DATE,RPI_PHOTO_PATH,RPI_ID,PTI_ID,
+        RPI_DELEGATE_START_DATE,RPI_DELEGATE_END_DATE,RPI_PRACTICE_GEOGRAPHICAL,ADI_NAME,AOI_COMPANY_WWW,AOI_CHARREF_NO,RPI_DP_LIST
+        )
+        values
+        (
+            #{SWSB_ID},#{RPI_NAME},#{SCO_NAME},#{AOI_NAME},#{CER_NUM},#{PTI_NAME},#{ECO_NAME},
+            #{OBTAIN_DATE},#{RPI_PHOTO_PATH},#{RPI_ID},#{PTI_ID},#{RPI_DELEGATE_START_DATE},
+            #{RPI_DELEGATE_END_DATE},#{RPI_PRACTICE_GEOGRAPHICAL},#{ADI_NAME},#{AOI_COMPANY_WWW},
+            #{AOI_CHARREF_NO},#{RPI_DP_LIST}
+        )
+    </insert>
+
     <select id="getAll" resultType="com.insects.getdata.domain.EmployeeDetail">
         select
             SWSB_ID,RPI_NAME,SCO_NAME,AOI_NAME,CER_NUM,PTI_NAME,ECO_NAME,OBTAIN_DATE,RPI_PHOTO_PATH,RPI_ID,PTI_ID,RPI_DELEGATE_START_DATE,RPI_DELEGATE_END_DATE,RPI_PRACTICE_GEOGRAPHICAL,ADI_NAME,AOI_COMPANY_WWW,AOI_CHARREF_NO,RPI_DP_LIST;

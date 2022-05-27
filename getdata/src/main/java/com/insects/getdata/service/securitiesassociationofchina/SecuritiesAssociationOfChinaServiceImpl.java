@@ -7,7 +7,9 @@ import com.google.errorprone.annotations.Var;
 import com.insects.getdata.common.HttpCommonUtils;
 import com.insects.getdata.domain.Company;
 import com.insects.getdata.domain.Employee;
+import com.insects.getdata.domain.EmployeeDetail;
 import com.insects.getdata.service.baseServiceImpl.CompanyServiceImpl;
+import com.insects.getdata.service.baseServiceImpl.EmployeeDetailServiceImpl;
 import com.insects.getdata.service.baseServiceImpl.EmployeeServiceImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -41,6 +43,9 @@ public class SecuritiesAssociationOfChinaServiceImpl {
 
     @Autowired
     EmployeeServiceImpl employeeService;
+
+    @Autowired
+    EmployeeDetailServiceImpl employeeDetailService;
 
     private static X509TrustManager tm = new X509TrustManager() {
         @Override
@@ -127,6 +132,7 @@ public class SecuritiesAssociationOfChinaServiceImpl {
             httpPost.setEntity(new UrlEncodedFormEntity(convertEmployeePPPIDReq(pppId)));
             HttpResponse responseSon = httpClient.execute(httpPost);
             String resultSon = EntityUtils.toString(responseSon.getEntity(), "utf-8");
+            System.out.println(resultSon);
             JSONArray RPIIDArray = JSON.parseArray(resultSon);
             for (Object jsonObject : RPIIDArray) {
                 String rpiId = ((JSONObject) jsonObject).getString("RPI_ID");
@@ -135,10 +141,17 @@ public class SecuritiesAssociationOfChinaServiceImpl {
                 httpPost.setEntity(new UrlEncodedFormEntity(convertEmployeeDetailReq(rpiId)));
                 HttpResponse responseDetail = httpClient.execute(httpPost);
                 String resultDetail = EntityUtils.toString(responseDetail.getEntity(), "utf-8");
-
-                System.out.println("11");
+                JSONArray employJSONArray = JSON.parseArray(resultDetail);
+                for (int i = 0; i < employJSONArray.size(); i++) {
+                    JSONObject resEmployeDetail = employJSONArray.getJSONObject(i);
+                    EmployeeDetail employeeDetail = JSON.toJavaObject(resEmployeDetail, EmployeeDetail.class);
+                    employeeDetailService.addOne(employeeDetail);
+                }
             }
-            System.out.println(resultSon);
+            if(RPIIDArray.size() == 0){
+                System.out.println("pppid is a " + pppId);
+
+            }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (ClientProtocolException e) {
@@ -178,7 +191,7 @@ public class SecuritiesAssociationOfChinaServiceImpl {
                 employees.add(employee);
                 if ((i % 50 == 0 && i != 0) || employArray.size() - 1 == i) {
                     employeeService.addEmploee(employees);
-                    System.out.println(Thread.currentThread() + " ----- Employee size is : " + employees.size());
+//                    System.out.println(Thread.currentThread() + " ----- Employee size is : " + employees.size());
                     employees.clear();
                 }
             }
