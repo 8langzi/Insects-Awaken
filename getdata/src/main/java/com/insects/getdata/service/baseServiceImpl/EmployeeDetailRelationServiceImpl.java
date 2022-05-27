@@ -16,4 +16,12 @@ public class EmployeeDetailRelationServiceImpl {
     public void addOne(EmployeeDetailRelation employeeDetailRelation){
         employeeDetailRelationMapper.addOne(employeeDetailRelation);
     }
+
+    public List<String> getEmployeePPPIDByRelationNotExists(){
+        return employeeDetailRelationMapper.getEmployeePPPIDByRelationNotExists();
+    }
+
+    public List<String> getEmployeeRPIIDByRelationNotExists(){
+        return employeeDetailRelationMapper.getEmployeeRPIIDByRelationNotExists();
+    }
 }

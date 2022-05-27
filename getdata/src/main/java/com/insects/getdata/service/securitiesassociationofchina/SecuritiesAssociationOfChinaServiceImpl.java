@@ -3,7 +3,6 @@ package com.insects.getdata.service.securitiesassociationofchina;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.errorprone.annotations.Var;
 import com.insects.getdata.common.HttpCommonUtils;
 import com.insects.getdata.domain.Company;
 import com.insects.getdata.domain.Employee;
@@ -17,6 +16,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
@@ -130,8 +130,8 @@ public class SecuritiesAssociationOfChinaServiceImpl {
         });
     }
 
-    public void processEmployeeDetailByPPPID() {
-        List<String> allPPPID = employeeService.getAllPPPID();
+    public void processEmployeeDetailRelationByPPPID() {
+        List<String> allPPPID = employeeDetailRelationService.getEmployeePPPIDByRelationNotExists();
         allPPPID.parallelStream().forEach(pppId -> {
             SSLContext ctx = null;
             try {
@@ -139,6 +139,7 @@ public class SecuritiesAssociationOfChinaServiceImpl {
                 ctx.init(null, new TrustManager[]{tm}, null);
                 HttpClient httpClient = HttpClients.custom().setSSLContext(ctx).build();
                 HttpPost httpPost = new HttpPost(employeeRPIIDUrl);
+                httpPost.setConfig(RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build());
                 HttpCommonUtils.setHeader(httpPost);
                 convertEmployeeDetailAndInsertDBByPPPID(pppId, httpClient, httpPost);
             } catch (NoSuchAlgorithmException e) {
@@ -151,6 +152,48 @@ public class SecuritiesAssociationOfChinaServiceImpl {
         });
     }
 
+    public void processEmployeeDetailByRPIID() {
+        List<String> allRPIID = employeeDetailRelationService.getEmployeeRPIIDByRelationNotExists();
+        allRPIID.parallelStream().forEach(rpiId -> {
+            SSLContext ctx = null;
+            try {
+                ctx = SSLContext.getInstance("TLS");
+                ctx.init(null, new TrustManager[]{tm}, null);
+                HttpClient httpClient = HttpClients.custom().setSSLContext(ctx).build();
+                HttpPost httpPost = new HttpPost(employeeRPIIDUrl);
+                HttpCommonUtils.setHeader(httpPost);
+                convertEmployeeDetailAndInsertDBByRPIID(rpiId, httpClient, httpPost);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void convertEmployeeDetailAndInsertDBByRPIID(String rpiId, HttpClient httpClient, HttpPost httpPost) {
+        try {
+            httpPost = new HttpPost(employeeRPIIDUrl);
+            HttpCommonUtils.setHeader(httpPost);
+            httpPost.setEntity(new UrlEncodedFormEntity(convertEmployeeDetailReq(rpiId)));
+            HttpResponse responseDetail = httpClient.execute(httpPost);
+            String resultDetail = EntityUtils.toString(responseDetail.getEntity(), "utf-8");
+            JSONArray employJSONArray = JSON.parseArray(resultDetail);
+            for (int i = 0; i < employJSONArray.size(); i++) {
+                JSONObject resEmployeDetail = employJSONArray.getJSONObject(i);
+                EmployeeDetail employeeDetail = JSON.toJavaObject(resEmployeDetail, EmployeeDetail.class);
+                employeeDetailService.addOne(employeeDetail);
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public void convertEmployeeDetailAndInsertDBByPPPID(String pppId, HttpClient httpClient, HttpPost httpPost) throws IOException {
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(convertEmployeePPPIDReq(pppId)));
@@ -160,17 +203,6 @@ public class SecuritiesAssociationOfChinaServiceImpl {
             for (Object jsonObject : RPIIDArray) {
                 String rpiId = ((JSONObject) jsonObject).getString("RPI_ID");
                 employeeDetailRelationService.addOne(new EmployeeDetailRelation(pppId,rpiId,"0"));
-//                httpPost = new HttpPost(employeeRPIIDUrl);
-//                HttpCommonUtils.setHeader(httpPost);
-//                httpPost.setEntity(new UrlEncodedFormEntity(convertEmployeeDetailReq(rpiId)));
-//                HttpResponse responseDetail = httpClient.execute(httpPost);
-//                String resultDetail = EntityUtils.toString(responseDetail.getEntity(), "utf-8");
-//                JSONArray employJSONArray = JSON.parseArray(resultDetail);
-//                for (int i = 0; i < employJSONArray.size(); i++) {
-//                    JSONObject resEmployeDetail = employJSONArray.getJSONObject(i);
-//                    EmployeeDetail employeeDetail = JSON.toJavaObject(resEmployeDetail, EmployeeDetail.class);
-//                    employeeDetailService.addOne(employeeDetail);
-//                }
             }
             if(RPIIDArray.size() == 0){
                 System.out.println("pppid is a " + pppId);

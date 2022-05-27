@@ -19,5 +19,13 @@
         values (#{PPP_ID},#{RPI_ID},#{STATE})
 
     </insert>
+    <select id="getEmployeePPPIDByRelationNotExists" resultType="java.lang.String">
+        select PPP_ID from employee where PPP_ID not in (select PPP_ID from employee_detail_relation)
+    </select>
+
+    <select id="getEmployeeRPIIDByRelationNotExists" resultType="java.lang.String">
+        select RPI_ID from employee_detail_relation where RPI_ID not in (select RPI_ID from employee_detail)
+    </select>
+
 
 </mapper>

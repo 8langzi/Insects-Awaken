@@ -9,4 +9,7 @@ public interface EmployeeDetailRelationMapper {
 
     void addOne(EmployeeDetailRelation employeeDetailRelation);
 
+    List<String> getEmployeePPPIDByRelationNotExists();
+
+    List<String> getEmployeeRPIIDByRelationNotExists();
 }
