@@ -11,4 +11,6 @@ public interface EmployeeDetailMapper {
     List<EmployeeDetail> getAll();
 
     void addOne(EmployeeDetail employeeDetail);
+
+    List<String> getAllRIPID();
 }

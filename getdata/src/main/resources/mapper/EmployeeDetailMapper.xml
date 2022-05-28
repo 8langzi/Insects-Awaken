@@ -48,6 +48,9 @@
         select
             SWSB_ID,RPI_NAME,SCO_NAME,AOI_NAME,CER_NUM,PTI_NAME,ECO_NAME,OBTAIN_DATE,RPI_PHOTO_PATH,RPI_ID,PTI_ID,RPI_DELEGATE_START_DATE,RPI_DELEGATE_END_DATE,RPI_PRACTICE_GEOGRAPHICAL,ADI_NAME,AOI_COMPANY_WWW,AOI_CHARREF_NO,RPI_DP_LIST;
         from
-            company
+            employee_detail
+    </select>
+    <select id="getAllRIPID" resultType="java.lang.String">
+        select RPI_ID FROM employee_detail
     </select>
 </mapper>

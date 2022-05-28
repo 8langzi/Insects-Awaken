@@ -4,14 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.insects.getdata.common.HttpCommonUtils;
-import com.insects.getdata.domain.Company;
-import com.insects.getdata.domain.Employee;
-import com.insects.getdata.domain.EmployeeDetail;
-import com.insects.getdata.domain.EmployeeDetailRelation;
-import com.insects.getdata.service.baseServiceImpl.CompanyServiceImpl;
-import com.insects.getdata.service.baseServiceImpl.EmployeeDetailRelationServiceImpl;
-import com.insects.getdata.service.baseServiceImpl.EmployeeDetailServiceImpl;
-import com.insects.getdata.service.baseServiceImpl.EmployeeServiceImpl;
+import com.insects.getdata.domain.*;
+import com.insects.getdata.service.baseServiceImpl.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -35,7 +30,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SecuritiesAssociationOfChinaServiceImpl {
@@ -51,6 +48,9 @@ public class SecuritiesAssociationOfChinaServiceImpl {
 
     @Autowired
     EmployeeDetailRelationServiceImpl employeeDetailRelationService;
+
+    @Autowired
+    EmployeeDetailRecordServiceImpl employeeDetailRecordService;
 
     private static X509TrustManager tm = new X509TrustManager() {
         @Override
@@ -153,8 +153,12 @@ public class SecuritiesAssociationOfChinaServiceImpl {
     }
 
     public void processEmployeeDetailByRPIID() {
-        List<String> allRPIID = employeeDetailRelationService.getEmployeeRPIIDByRelationNotExists();
-        allRPIID.parallelStream().forEach(rpiId -> {
+        List<String> allRelationRPIID = employeeDetailRelationService.getAllRelationRPIID();
+        List<String> allRIPID = employeeDetailService.getAllRIPID();
+        allRelationRPIID = allRelationRPIID.parallelStream().filter(o -> !allRIPID.contains(o)).collect(Collectors.toList());
+//        List<String> allRPIID = employeeDetailRelationService.getEmployeeRPIIDByRelationNotExists();
+        System.out.println(allRelationRPIID.size());
+        allRelationRPIID.parallelStream().forEach(rpiId -> {
             SSLContext ctx = null;
             try {
                 ctx = SSLContext.getInstance("TLS");
@@ -169,6 +173,160 @@ public class SecuritiesAssociationOfChinaServiceImpl {
                 e.printStackTrace();
             }
         });
+    }
+
+    public void processEmployeeDetailRecordByRPIID() {
+        List<String> allRelationRPIID = employeeDetailRelationService.getAllRelationRPIID();
+        List<String> allRecordRPIID = employeeDetailRecordService.getAllRPIID();
+        allRelationRPIID = allRelationRPIID.parallelStream().filter(o -> !allRecordRPIID.contains(o)).collect(Collectors.toList());
+        allRelationRPIID.parallelStream().forEach(rpiId -> {
+            SSLContext ctx = null;
+            try {
+                ctx = SSLContext.getInstance("TLS");
+                ctx.init(null, new TrustManager[]{tm}, null);
+                HttpClient httpClient = HttpClients.custom().setSSLContext(ctx).build();
+                HttpPost httpPost = new HttpPost(employeeRPIIDUrl);
+                HttpCommonUtils.setHeader(httpPost);
+                convertEmployeeDetailRecordAndInsertDBByRPIID(rpiId, httpClient, httpPost);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void convertEmployeeDetailRecordAndInsertDBByRPIID(String rpiId, HttpClient httpClient, HttpPost httpPost) {
+        try {
+            HttpCommonUtils.setHeader(httpPost);
+            httpPost.setEntity(new UrlEncodedFormEntity(convertEmployeeDetailRecordReq(rpiId)));
+            HttpResponse responseDetail = httpClient.execute(httpPost);
+            String resultDetail = EntityUtils.toString(responseDetail.getEntity(), "utf-8");
+            JSONArray employJSONArray = JSON.parseArray(resultDetail);
+            List<JSONObject> list = JSONObject.parseArray(employJSONArray.toJSONString(), JSONObject.class);
+            Collections.sort(list, (JSONObject o1, JSONObject o2) -> {
+               String o1Date = o1.getString("OBTAIN_DATE");
+               String o2Date = o2.getString("OBTAIN_DATE");
+               if(StringUtils.compare(o1Date, o2Date) > 0){
+                   return 1;
+               }else {
+                   return -1;
+               }
+            });
+            EmployeeDetailRecord employeeDetailRecord = new EmployeeDetailRecord();
+            for (int i = 0; i < list.size(); i++) {
+                dealWithListAndRecord(i,employeeDetailRecord,list.get(i));
+            }
+            employeeDetailRecordService.addOne(employeeDetailRecord);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void dealWithListAndRecord(int i, EmployeeDetailRecord employeeDetailRecord,JSONObject jsonObject) {
+        if(i == 0){
+            employeeDetailRecord.setSWSC_ID1(jsonObject.getString("SWSC_ID"));
+            employeeDetailRecord.setCER_NUM1(jsonObject.getString("CER_NUM"));
+            employeeDetailRecord.setOBTAIN_DATE1(jsonObject.getString("OBTAIN_DATE"));
+            employeeDetailRecord.setAOI_NAME1(jsonObject.getString("AOI_NAME"));
+            employeeDetailRecord.setPTI_NAME1(jsonObject.getString("PTI_NAME"));
+            employeeDetailRecord.setCERTC_NAME1(jsonObject.getString("CERTC_NAME"));
+            employeeDetailRecord.setOPER_DATE1(jsonObject.getString("OPER_DATE"));
+            employeeDetailRecord.setRPI_ID1(jsonObject.getString("RPI_ID"));
+        } else if(i == 1){
+            employeeDetailRecord.setSWSC_ID2(jsonObject.getString("SWSC_ID"));
+            employeeDetailRecord.setCER_NUM2(jsonObject.getString("CER_NUM"));
+            employeeDetailRecord.setOBTAIN_DATE2(jsonObject.getString("OBTAIN_DATE"));
+            employeeDetailRecord.setAOI_NAME2(jsonObject.getString("AOI_NAME"));
+            employeeDetailRecord.setPTI_NAME2(jsonObject.getString("PTI_NAME"));
+            employeeDetailRecord.setCERTC_NAME2(jsonObject.getString("CERTC_NAME"));
+            employeeDetailRecord.setOPER_DATE2(jsonObject.getString("OPER_DATE"));
+            employeeDetailRecord.setRPI_ID2(jsonObject.getString("RPI_ID"));
+        } else if(i == 2){
+            employeeDetailRecord.setSWSC_ID3(jsonObject.getString("SWSC_ID"));
+            employeeDetailRecord.setCER_NUM3(jsonObject.getString("CER_NUM"));
+            employeeDetailRecord.setOBTAIN_DATE3(jsonObject.getString("OBTAIN_DATE"));
+            employeeDetailRecord.setAOI_NAME3(jsonObject.getString("AOI_NAME"));
+            employeeDetailRecord.setPTI_NAME3(jsonObject.getString("PTI_NAME"));
+            employeeDetailRecord.setCERTC_NAME3(jsonObject.getString("CERTC_NAME"));
+            employeeDetailRecord.setOPER_DATE3(jsonObject.getString("OPER_DATE"));
+            employeeDetailRecord.setRPI_ID3(jsonObject.getString("RPI_ID"));
+        } else if(i == 3){
+            employeeDetailRecord.setSWSC_ID4(jsonObject.getString("SWSC_ID"));
+            employeeDetailRecord.setCER_NUM4(jsonObject.getString("CER_NUM"));
+            employeeDetailRecord.setOBTAIN_DATE4(jsonObject.getString("OBTAIN_DATE"));
+            employeeDetailRecord.setAOI_NAME4(jsonObject.getString("AOI_NAME"));
+            employeeDetailRecord.setPTI_NAME4(jsonObject.getString("PTI_NAME"));
+            employeeDetailRecord.setCERTC_NAME4(jsonObject.getString("CERTC_NAME"));
+            employeeDetailRecord.setOPER_DATE4(jsonObject.getString("OPER_DATE"));
+            employeeDetailRecord.setRPI_ID4(jsonObject.getString("RPI_ID"));
+        } else if(i == 4){
+            employeeDetailRecord.setSWSC_ID5(jsonObject.getString("SWSC_ID"));
+            employeeDetailRecord.setCER_NUM5(jsonObject.getString("CER_NUM"));
+            employeeDetailRecord.setOBTAIN_DATE5(jsonObject.getString("OBTAIN_DATE"));
+            employeeDetailRecord.setAOI_NAME5(jsonObject.getString("AOI_NAME"));
+            employeeDetailRecord.setPTI_NAME5(jsonObject.getString("PTI_NAME"));
+            employeeDetailRecord.setCERTC_NAME5(jsonObject.getString("CERTC_NAME"));
+            employeeDetailRecord.setOPER_DATE5(jsonObject.getString("OPER_DATE"));
+            employeeDetailRecord.setRPI_ID5(jsonObject.getString("RPI_ID"));
+        } else if(i == 5){
+            employeeDetailRecord.setSWSC_ID6(jsonObject.getString("SWSC_ID"));
+            employeeDetailRecord.setCER_NUM6(jsonObject.getString("CER_NUM"));
+            employeeDetailRecord.setOBTAIN_DATE6(jsonObject.getString("OBTAIN_DATE"));
+            employeeDetailRecord.setAOI_NAME6(jsonObject.getString("AOI_NAME"));
+            employeeDetailRecord.setPTI_NAME6(jsonObject.getString("PTI_NAME"));
+            employeeDetailRecord.setCERTC_NAME6(jsonObject.getString("CERTC_NAME"));
+            employeeDetailRecord.setOPER_DATE6(jsonObject.getString("OPER_DATE"));
+            employeeDetailRecord.setRPI_ID6(jsonObject.getString("RPI_ID"));
+        } else if(i == 6){
+            employeeDetailRecord.setSWSC_ID7(jsonObject.getString("SWSC_ID"));
+            employeeDetailRecord.setCER_NUM7(jsonObject.getString("CER_NUM"));
+            employeeDetailRecord.setOBTAIN_DATE7(jsonObject.getString("OBTAIN_DATE"));
+            employeeDetailRecord.setAOI_NAME7(jsonObject.getString("AOI_NAME"));
+            employeeDetailRecord.setPTI_NAME7(jsonObject.getString("PTI_NAME"));
+            employeeDetailRecord.setCERTC_NAME7(jsonObject.getString("CERTC_NAME"));
+            employeeDetailRecord.setOPER_DATE7(jsonObject.getString("OPER_DATE"));
+            employeeDetailRecord.setRPI_ID7(jsonObject.getString("RPI_ID"));
+        }else if(i == 7){
+            employeeDetailRecord.setSWSC_ID8(jsonObject.getString("SWSC_ID"));
+            employeeDetailRecord.setCER_NUM8(jsonObject.getString("CER_NUM"));
+            employeeDetailRecord.setOBTAIN_DATE8(jsonObject.getString("OBTAIN_DATE"));
+            employeeDetailRecord.setAOI_NAME8(jsonObject.getString("AOI_NAME"));
+            employeeDetailRecord.setPTI_NAME8(jsonObject.getString("PTI_NAME"));
+            employeeDetailRecord.setCERTC_NAME8(jsonObject.getString("CERTC_NAME"));
+            employeeDetailRecord.setOPER_DATE8(jsonObject.getString("OPER_DATE"));
+            employeeDetailRecord.setRPI_ID8(jsonObject.getString("RPI_ID"));
+        }else if(i == 8){
+            employeeDetailRecord.setSWSC_ID9(jsonObject.getString("SWSC_ID"));
+            employeeDetailRecord.setCER_NUM9(jsonObject.getString("CER_NUM"));
+            employeeDetailRecord.setOBTAIN_DATE9(jsonObject.getString("OBTAIN_DATE"));
+            employeeDetailRecord.setAOI_NAME9(jsonObject.getString("AOI_NAME"));
+            employeeDetailRecord.setPTI_NAME9(jsonObject.getString("PTI_NAME"));
+            employeeDetailRecord.setCERTC_NAME9(jsonObject.getString("CERTC_NAME"));
+            employeeDetailRecord.setOPER_DATE9(jsonObject.getString("OPER_DATE"));
+            employeeDetailRecord.setRPI_ID9(jsonObject.getString("RPI_ID"));
+        }else if(i == 9){
+            employeeDetailRecord.setSWSC_ID10(jsonObject.getString("SWSC_ID"));
+            employeeDetailRecord.setCER_NUM10(jsonObject.getString("CER_NUM"));
+            employeeDetailRecord.setOBTAIN_DATE10(jsonObject.getString("OBTAIN_DATE"));
+            employeeDetailRecord.setAOI_NAME10(jsonObject.getString("AOI_NAME"));
+            employeeDetailRecord.setPTI_NAME10(jsonObject.getString("PTI_NAME"));
+            employeeDetailRecord.setCERTC_NAME10(jsonObject.getString("CERTC_NAME"));
+            employeeDetailRecord.setOPER_DATE10(jsonObject.getString("OPER_DATE"));
+            employeeDetailRecord.setRPI_ID10(jsonObject.getString("RPI_ID"));
+        }
+    }
+
+    private List<? extends NameValuePair> convertEmployeeDetailRecordReq(String rpiId) {
+        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        nvps.add(new BasicNameValuePair("filter_EQS_RPI_ID", rpiId));
+        nvps.add(new BasicNameValuePair("sqlkey", "homepage"));
+        nvps.add(new BasicNameValuePair("sqlval", "SEARCH_SWSC_CHANGE_INFO_new"));
+        return nvps;
     }
 
     private void convertEmployeeDetailAndInsertDBByRPIID(String rpiId, HttpClient httpClient, HttpPost httpPost) {

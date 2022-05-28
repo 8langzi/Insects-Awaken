@@ -24,4 +24,9 @@ public class EmployeeDetailRelationServiceImpl {
     public List<String> getEmployeeRPIIDByRelationNotExists(){
         return employeeDetailRelationMapper.getEmployeeRPIIDByRelationNotExists();
     }
+
+    public List<String> getAllRelationRPIID(){
+        return employeeDetailRelationMapper.getAllRelationRIPID();
+    }
+
 }

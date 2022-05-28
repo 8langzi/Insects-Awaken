@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.insects.getdata.mapper.EmployeeDetailRecordMapper">
+    <!--    <resultMap id="BaseResultMap" type="com.insects.dynamicservice.domain.Company">-->
+    <!--        <result column="AOI_NAME" jdbcType="VARCHAR" property="AOI_NAME" />-->
+    <!--        <result column="AOI_ID" jdbcType="VARCHAR" property="AOI_ID" />-->
+    <!--        <result column="PR_COUNT_PERSON" jdbcType="VARCHAR" property="PR_COUNT_PERSON" />-->
+    <!--        <result column="PTI0PERSON" jdbcType="VARCHAR" property="PTI0PERSON" />-->
+    <!--        <result column="PTI1PERSON" jdbcType="VARCHAR" property="PTI1PERSON" />-->
+    <!--        <result column="PTI2PERSON" jdbcType="VARCHAR" property="PTI2PERSON" />-->
+    <!--        <result column="PTI3PERSON" jdbcType="VARCHAR" property="PTI3PERSON" />-->
+    <!--        <result column="PTI4PERSON" jdbcType="VARCHAR" property="PTI4PERSON" />-->
+    <!--        <result column="PTI5PERSON" jdbcType="VARCHAR" property="PTI5PERSON" />-->
+    <!--        <result column="PTI6PERSON" jdbcType="VARCHAR" property="PTI6PERSON" />-->
+    <!--        <result column="PTI7PERSON" jdbcType="VARCHAR" property="PTI7PERSON" />-->
+    <!--    </resultMap>-->
+    <insert id="addOne" parameterType="java.util.List">
+        replace into employee_detail_record (
+            SWSC_ID1,CER_NUM1,OBTAIN_DATE1,AOI_NAME1,PTI_NAME1,CERTC_NAME1,OPER_DATE1,RPI_ID1,
+            SWSC_ID2,CER_NUM2,OBTAIN_DATE2,AOI_NAME2,PTI_NAME2,CERTC_NAME2,OPER_DATE2,RPI_ID2,
+            SWSC_ID3,CER_NUM3,OBTAIN_DATE3,AOI_NAME3,PTI_NAME3,CERTC_NAME3,OPER_DATE3,RPI_ID3,
+            SWSC_ID4,CER_NUM4,OBTAIN_DATE4,AOI_NAME4,PTI_NAME4,CERTC_NAME4,OPER_DATE4,RPI_ID4,
+            SWSC_ID5,CER_NUM5,OBTAIN_DATE5,AOI_NAME5,PTI_NAME5,CERTC_NAME5,OPER_DATE5,RPI_ID5,
+            SWSC_ID6,CER_NUM6,OBTAIN_DATE6,AOI_NAME6,PTI_NAME6,CERTC_NAME6,OPER_DATE6,RPI_ID6,
+            SWSC_ID7,CER_NUM7,OBTAIN_DATE7,AOI_NAME7,PTI_NAME7,CERTC_NAME7,OPER_DATE7,RPI_ID7,
+            SWSC_ID8,CER_NUM8,OBTAIN_DATE8,AOI_NAME8,PTI_NAME8,CERTC_NAME8,OPER_DATE8,RPI_ID8,
+            SWSC_ID9,CER_NUM9,OBTAIN_DATE9,AOI_NAME9,PTI_NAME9,CERTC_NAME9,OPER_DATE9,RPI_ID9,
+            SWSC_ID10,CER_NUM10,OBTAIN_DATE10,AOI_NAME10,PTI_NAME10,CERTC_NAME10,OPER_DATE10,RPI_ID10
+        )
+        values (
+            #{SWSC_ID1},#{CER_NUM1},#{OBTAIN_DATE1},#{AOI_NAME1},#{PTI_NAME1},#{CERTC_NAME1},#{OPER_DATE1},#{RPI_ID1},
+            #{SWSC_ID2},#{CER_NUM2},#{OBTAIN_DATE2},#{AOI_NAME2},#{PTI_NAME2},#{CERTC_NAME2},#{OPER_DATE2},#{RPI_ID2},
+            #{SWSC_ID3},#{CER_NUM3},#{OBTAIN_DATE3},#{AOI_NAME3},#{PTI_NAME3},#{CERTC_NAME3},#{OPER_DATE3},#{RPI_ID3},
+            #{SWSC_ID4},#{CER_NUM4},#{OBTAIN_DATE4},#{AOI_NAME4},#{PTI_NAME4},#{CERTC_NAME4},#{OPER_DATE4},#{RPI_ID4},
+            #{SWSC_ID5},#{CER_NUM5},#{OBTAIN_DATE5},#{AOI_NAME5},#{PTI_NAME5},#{CERTC_NAME5},#{OPER_DATE5},#{RPI_ID5},
+            #{SWSC_ID6},#{CER_NUM6},#{OBTAIN_DATE6},#{AOI_NAME6},#{PTI_NAME6},#{CERTC_NAME6},#{OPER_DATE6},#{RPI_ID6},
+            #{SWSC_ID7},#{CER_NUM7},#{OBTAIN_DATE7},#{AOI_NAME7},#{PTI_NAME7},#{CERTC_NAME7},#{OPER_DATE7},#{RPI_ID7},
+            #{SWSC_ID8},#{CER_NUM8},#{OBTAIN_DATE8},#{AOI_NAME8},#{PTI_NAME8},#{CERTC_NAME8},#{OPER_DATE8},#{RPI_ID8},
+            #{SWSC_ID9},#{CER_NUM9},#{OBTAIN_DATE9},#{AOI_NAME9},#{PTI_NAME9},#{CERTC_NAME9},#{OPER_DATE9},#{RPI_ID9},
+            #{SWSC_ID10},#{CER_NUM10},#{OBTAIN_DATE10},#{AOI_NAME10},#{PTI_NAME10},#{CERTC_NAME10},#{OPER_DATE10},#{RPI_ID10}
+        )
+    </insert>
+    <select id="getAllRPIID" resultType="java.lang.String">
+        select RPI_ID1 from employee_detail_record
+    </select>
+
+
+</mapper>

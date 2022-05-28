@@ -12,4 +12,6 @@ public interface EmployeeDetailRelationMapper {
     List<String> getEmployeePPPIDByRelationNotExists();
 
     List<String> getEmployeeRPIIDByRelationNotExists();
+
+    List<String> getAllRelationRIPID();
 }

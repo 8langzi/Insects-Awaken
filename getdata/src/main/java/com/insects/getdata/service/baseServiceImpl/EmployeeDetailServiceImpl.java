@@ -24,4 +24,8 @@ public class EmployeeDetailServiceImpl {
     public void addOne(EmployeeDetail employeeDetail){
         employeeDetailMapper.addOne(employeeDetail);
     }
+
+    public List<String> getAllRIPID(){
+        return employeeDetailMapper.getAllRIPID();
+    }
 }

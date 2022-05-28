@@ -24,8 +24,11 @@
     </select>
 
     <select id="getEmployeeRPIIDByRelationNotExists" resultType="java.lang.String">
-        select RPI_ID from employee_detail_relation where RPI_ID not in (select RPI_ID from employee_detail)
+        select RPI_ID from employee_detail_relation where RPI_ID not in (select RPI_ID from employee_detail) LIMIT 0, 50000
     </select>
 
+    <select id="getAllRelationRIPID" resultType="java.lang.String">
+        select RPI_ID from employee_detail_relation
+    </select>
 
 </mapper>
