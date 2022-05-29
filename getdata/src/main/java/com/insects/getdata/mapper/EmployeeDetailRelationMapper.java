@@ -4,6 +4,7 @@ package com.insects.getdata.mapper;
 import com.insects.getdata.domain.EmployeeDetailRelation;
 
 import java.util.List;
+import java.util.Set;
 
 public interface EmployeeDetailRelationMapper {
 
@@ -13,5 +14,5 @@ public interface EmployeeDetailRelationMapper {
 
     List<String> getEmployeeRPIIDByRelationNotExists();
 
-    List<String> getAllRelationRIPID();
+    Set<String> getAllRelationRIPID();
 }

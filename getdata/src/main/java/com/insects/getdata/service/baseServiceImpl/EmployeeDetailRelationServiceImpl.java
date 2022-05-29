@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class EmployeeDetailRelationServiceImpl {
@@ -25,7 +26,7 @@ public class EmployeeDetailRelationServiceImpl {
         return employeeDetailRelationMapper.getEmployeeRPIIDByRelationNotExists();
     }
 
-    public List<String> getAllRelationRPIID(){
+    public Set<String> getAllRelationRPIID(){
         return employeeDetailRelationMapper.getAllRelationRIPID();
     }
 

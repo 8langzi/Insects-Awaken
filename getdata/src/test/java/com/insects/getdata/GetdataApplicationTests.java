@@ -10,6 +10,8 @@ import org.springframework.context.annotation.ComponentScan;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 @SpringBootTest
 @ComponentScan("com.insects")
@@ -49,9 +51,28 @@ class GetdataApplicationTests {
         }
     }
 
+    @Test
+    void getEmployeeLeaderData(){
+        try {
+            securitiesAssociationOfChinaService.processAcquiredEmployeeLeaderData();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void getRPIID(){
-        securitiesAssociationOfChinaService.processEmployeeDetailByPPPID();
+        securitiesAssociationOfChinaService.processEmployeeDetailRelationByPPPID();
     }
+
+    @Test
+    public void getEmployeeDetailRecord(){
+        securitiesAssociationOfChinaService.processEmployeeDetailRecordByRPIID();
+    }
+
+
 }

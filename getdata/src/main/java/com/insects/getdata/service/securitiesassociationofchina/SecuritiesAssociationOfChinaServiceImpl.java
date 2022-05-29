@@ -32,6 +32,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -153,10 +154,9 @@ public class SecuritiesAssociationOfChinaServiceImpl {
     }
 
     public void processEmployeeDetailByRPIID() {
-        List<String> allRelationRPIID = employeeDetailRelationService.getAllRelationRPIID();
-        List<String> allRIPID = employeeDetailService.getAllRIPID();
-        allRelationRPIID = allRelationRPIID.parallelStream().filter(o -> !allRIPID.contains(o)).collect(Collectors.toList());
-//        List<String> allRPIID = employeeDetailRelationService.getEmployeeRPIIDByRelationNotExists();
+        Set<String> allRelationRPIID = employeeDetailRelationService.getAllRelationRPIID();
+        List<String> allRecordRPIID = employeeDetailRecordService.getAllRPIID();
+        allRelationRPIID.removeAll(allRecordRPIID);
         System.out.println(allRelationRPIID.size());
         allRelationRPIID.parallelStream().forEach(rpiId -> {
             SSLContext ctx = null;
@@ -176,9 +176,9 @@ public class SecuritiesAssociationOfChinaServiceImpl {
     }
 
     public void processEmployeeDetailRecordByRPIID() {
-        List<String> allRelationRPIID = employeeDetailRelationService.getAllRelationRPIID();
+        Set<String> allRelationRPIID = employeeDetailRelationService.getAllRelationRPIID();
         List<String> allRecordRPIID = employeeDetailRecordService.getAllRPIID();
-        allRelationRPIID = allRelationRPIID.parallelStream().filter(o -> !allRecordRPIID.contains(o)).collect(Collectors.toList());
+        allRelationRPIID.removeAll(allRecordRPIID);
         allRelationRPIID.parallelStream().forEach(rpiId -> {
             SSLContext ctx = null;
             try {
