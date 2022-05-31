@@ -1,0 +1,16 @@
+# 应用名称
+web:
+  remote:
+    serviceMapping:
+      - users_timing|users/timefixeduser
+      - trades_pretrades|trades/pretrades
+
+    serverMapping:
+      trades:
+        domainname: insects-lb-trades-test
+        port: 4546
+      users:
+        domainname: insects-lb-users-test
+        port: 4547
+
+
