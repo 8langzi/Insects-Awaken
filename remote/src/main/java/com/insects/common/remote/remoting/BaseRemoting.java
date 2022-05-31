@@ -1,5 +1,6 @@
 package com.insects.common.remote.remoting;
 
+import com.insects.common.remote.utils.HttpServerException;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpEntity;
@@ -19,25 +20,32 @@ public class BaseRemoting implements Remote{
     @Setter
     private HttpHeaders headers;
 
+
     @Override
-    public <T> T getCall(RestTemplate restTemplate, String url, Class<T> clazz) {
-        return this.getCall(restTemplate,url,clazz,null);
+    public <T> T getCall(RestTemplate restTemplate, String url, Object requestBody, Class<T> clazz, HttpHeaders headers) {
+        return this.content(restTemplate, url, requestBody, clazz, HttpMethod.GET, headers);
     }
 
     @Override
-    public <T> T getCall(RestTemplate restTemplate, String url, Class<T> clazz, HttpHeaders headers) {
-        return null;
+    public <T> T postCall(RestTemplate restTemplate, String url, Object requestBody, Class<T> clazz, HttpHeaders headers) {
+        return this.content(restTemplate, url, requestBody, clazz, HttpMethod.POST, headers);
     }
 
     @Override
-    public <T> T postCall(RestTemplate restTemplate, String url, Class<T> clazz) {
-        return this.postCall(restTemplate,url,clazz,null);
+    public <T> T putCall(RestTemplate restTemplate, String url, Object requestBody, Class<T> clazz, HttpHeaders headers) {
+        return this.content(restTemplate, url, requestBody, clazz, HttpMethod.PUT, headers);
     }
 
     @Override
-    public <T> T postCall(RestTemplate restTemplate, String url, Class<T> clazz, HttpHeaders headers) {
-        return null;
+    public <T> T deleteCall(RestTemplate restTemplate, String url, Object requestBody, Class<T> clazz, HttpHeaders headers) {
+        return this.content(restTemplate, url, requestBody, clazz, HttpMethod.DELETE, headers);
     }
+
+    @Override
+    public <T> T patchCall(RestTemplate restTemplate, String url, Object requestBody, Class<T> clazz, HttpHeaders headers) {
+        return this.content(restTemplate, url, requestBody, clazz, HttpMethod.PATCH, headers);
+    }
+
 
     public <T> T content(RestTemplate restTemplate, String url, Object requestBody, Class<T> clazz, HttpMethod httpMethodValue,HttpHeaders headers) throws HttpServerErrorException {
         headers = headers == null ? this.headers : headers;
@@ -50,4 +58,5 @@ public class BaseRemoting implements Remote{
         }
         return responseEntity.getBody();
     }
+
 }

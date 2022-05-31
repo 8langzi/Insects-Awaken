@@ -3,12 +3,11 @@ package com.insects.common.remote.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Configuration
 @Component
@@ -40,6 +39,23 @@ public class RemoteConfig {
     @Bean("insectsServerPath")
     public Map<String, Map<String, String>> insectsServer(){
         return remoteProperties.getServerMapping();
+    }
+
+    @Bean(name = "restTemplate")
+    public RestTemplate restTemplate() {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        return getRestTemplate(requestFactory);
+    }
+
+    private RestTemplate getRestTemplate(SimpleClientHttpRequestFactory requestFactory) {
+        String readTimeout = Optional.ofNullable("600").orElse("60000");
+        String connectTimeout = Optional.ofNullable("600").orElse("60000");
+        requestFactory.setConnectTimeout(Integer.valueOf(connectTimeout));
+        requestFactory.setReadTimeout(Integer.valueOf(readTimeout));
+        RestTemplate restTemplate = new RestTemplate(requestFactory);
+//        HttpHeaderInterceptor hhi = new HttpHeaderInterceptor();
+//        restTemplate.getInterceptors().add(hhi);
+        return restTemplate;
     }
 
 }
